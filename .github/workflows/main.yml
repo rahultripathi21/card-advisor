@@ -1,4 +1,4 @@
-name: NestJS CI
+name: NestJS CI/CD
 
 on:
   push:
@@ -12,7 +12,7 @@ on:
       - master
 
 jobs:
-  build:
+  build-test-security:
     runs-on: ubuntu-latest
 
     strategy:
@@ -35,8 +35,19 @@ jobs:
       - name: Install webpack-cli
         run: npm install -D webpack-cli
 
-      - name: Build project
+      - name: Build application
         run: npm run build
 
       - name: Run tests
         run: npm test -- --passWithNoTests
+
+      - name: Run npm audit
+        run: npm audit --audit-level=high
+
+      - name: Install Snyk
+        run: npm install -g snyk
+
+      - name: Run Snyk scan
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        run: snyk test
